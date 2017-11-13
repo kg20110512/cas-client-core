@@ -19,9 +19,14 @@
 
 package org.jasig.cas.client.validation;
 
+import org.jasig.cas.client.authentication.AttributePrincipal;
+import org.jasig.cas.client.authentication.PasswordPrincipalImpl;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of a Ticket Validator that can validate tickets conforming to the CAS 1.0 specification.
@@ -50,8 +55,11 @@ public final class Cas10TicketValidator extends AbstractCasProtocolUrlBasedTicke
             final BufferedReader reader = new BufferedReader(new StringReader(response));
             reader.readLine();
             final String name = reader.readLine();
-
-            return new AssertionImpl(name);
+            //add password to principal
+            final String password = reader.readLine();
+            AttributePrincipal principal = new PasswordPrincipalImpl(name, password);
+            Assertion assertion = new AssertionImpl(principal);
+            return assertion;
         } catch (final IOException e) {
             throw new TicketValidationException("Unable to parse response.", e);
         }
